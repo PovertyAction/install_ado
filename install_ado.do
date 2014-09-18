@@ -64,6 +64,7 @@ foreach file in `adolist' {
 		}
 		st_local("els", els)
 		}
+		loc prevels
 		foreach el of loc els {
 			cap mkdir "`prevels'`el'"
 			* "prevels" for "previous elements"

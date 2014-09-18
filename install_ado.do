@@ -31,15 +31,6 @@ foreach file in `adolist' {
 *********************************UNDER THE HOOD*********************************
 *********************************DON'T BOTHER!**********************************
 	cap noi {
-		foreach loc in ado dir replace personal {
-			* "dq" for "double quote"
-			loc temp : subinstr loc `loc' `"""' "", count(loc dq)
-			if `dq' {
-				di as err "{c 'g}`loc'' invalid"
-				ex 198
-			}
-		}
-
 		conf f "`dir'/`ado'.ado"
 
 		if !regexm(substr("`ado'", 1, 1), "^[a-zA-z_]") {

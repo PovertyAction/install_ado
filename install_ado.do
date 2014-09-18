@@ -13,6 +13,11 @@ local dir "C:\Users\hpollock\Box Sync\RM&KM_Resources\Training_Resources\08_In D
 local adolist : dir "`dir'" file"*.ado"
 local adolist : subinstr loc adolist ".ado" "", all
 
+if !`:list sizeof adolist' qui {
+	noi di as txt _n "No ado-files found."
+	ex
+}
+
 foreach file in `adolist' {
 	local ado `file'
 	* Advanced: 1 to overwrite the ado-file if it already exists and 0 otherwise;

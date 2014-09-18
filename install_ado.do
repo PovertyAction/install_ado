@@ -42,8 +42,8 @@ if "`cmdname'" != "" {
 	loc adolist "`cmdname'"
 }
 else {
-	local adolist : dir "`dir'" file"*.ado"
-	local adolist : subinstr loc adolist ".ado" "", all
+	loc adolist : dir "`dir'" file "*.ado"
+	loc adolist : subinstr loc adolist ".ado" "", all
 
 	if !`:list sizeof adolist' qui {
 		noi di as txt _n "No ado-files found."
@@ -60,7 +60,7 @@ foreach ado of loc adolist {
 }
 
 * Install the ado-files of `adolist'.
-foreach ado in `adolist' {
+foreach ado of loc adolist {
 	cap noi {
 		if !`personal' ///
 			loc outdir "`c(sysdir_plus)'`=substr("`ado'", 1, 1)'/"

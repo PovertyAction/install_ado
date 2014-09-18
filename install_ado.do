@@ -4,46 +4,64 @@
 * Date of last revision: September 10, 2014
 
 
-*********************************MODIFY THE DIRECTORY NAME!**********************************
-local dir "C:\Users\hpollock\Box Sync\RM&KM_Resources\Training_Resources\08_In Development\Devt_Stata Training\ado"	// This is the location of the "ado" folder for the Stata trainings.
-*********************************************************************************************
+*********************************MODIFY THESE!**********************************
 
-*********************************MODIFY THESE ONLY IF YOU WANT TO****************************
-local adolist : dir "`dir'" file"*.ado"
-local adolist : subinstr loc adolist ".ado" "", all
+* The directory that contains the ado-file(s) to install
+local dir C:\Users\matthew\Desktop
+* Optional: The name of the single ado command to install.
+* The ado-file must exist in `dir'.
+* If left blank, all ado-files in `dir' are installed.
+local cmdname
 
-if !`:list sizeof adolist' qui {
-	noi di as txt _n "No ado-files found."
-	ex
-}
-
-foreach file in `adolist' {
-	local ado `file'
-	* Advanced: 1 to overwrite the ado-file if it already exists and 0 otherwise;
-	* default is 0.
-	local replace 0
-	* Advanced: 0 to install in the PLUS system directory and 1 to install in the
-	* PERSONAL system directory; default is 0.
-	local personal 0
+* Advanced: 1 to overwrite the ado-file if it already exists and 0 otherwise;
+* default is 0.
+local replace 0
+* Advanced: 0 to install in the PLUS system directory and 1 to install in the
+* PERSONAL system directory; default is 0.
+local personal 0
 
 
 *********************************UNDER THE HOOD*********************************
 *********************************DON'T BOTHER!**********************************
+
+* Check `replace' and `personal'.
+foreach loc in replace personal {
+	if !inlist("``loc''", "0", "1") {
+		di as err "{c 'g}`loc'' must be 0 or 1"
+		ex 198
+	}
+}
+
+* Define `adolist', the list of the names of the ado-file commands to install.
+if !`:length loc dir' ///
+	loc dir .
+if "`cmdname'" != "" {
+	* Check `cmdname'.
+	conf f "`dir'/`cmdname'.ado"
+
+	loc adolist "`cmdname'"
+}
+else {
+	local adolist : dir "`dir'" file"*.ado"
+	local adolist : subinstr loc adolist ".ado" "", all
+
+	if !`:list sizeof adolist' qui {
+		noi di as txt _n "No ado-files found."
+		ex
+	}
+}
+
+* Check `adolist'.
+foreach ado of loc adolist {
+	if !regexm(substr("`ado'", 1, 1), "^[a-zA-z_]") {
+		di as err "`ado' is an invalid command name"
+		ex 198
+	}
+}
+
+* Install the ado-files of `adolist'.
+foreach ado in `adolist' {
 	cap noi {
-		conf f "`dir'/`ado'.ado"
-
-		if !regexm(substr("`ado'", 1, 1), "^[a-zA-z_]") {
-			di as err "`ado' is an invalid command name"
-			ex 198
-		}
-
-		foreach loc in replace personal {
-			if !inlist("``loc''", "0", "1") {
-				di as err "{c 'g}`loc'' must be 0 or 1"
-				ex 198
-			}
-		}
-
 		if !`personal' ///
 			loc outdir "`c(sysdir_plus)'`=substr("`ado'", 1, 1)'/"
 		else ///

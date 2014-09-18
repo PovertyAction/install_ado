@@ -85,5 +85,5 @@ foreach file in `adolist' {
 		}
 
 		di as txt "Installation of {cmd:`ado'} complete."
-	}	
+	}
 }

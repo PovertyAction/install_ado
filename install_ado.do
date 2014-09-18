@@ -3,7 +3,6 @@
 * Purpose: Install an ado-file. Modified version installs all ado files in "adolist"
 * Date of last revision: September 10, 2014
 
-set more off
 
 *********************************MODIFY THE DIRECTORY NAME!**********************************
 local dir "C:\Users\hpollock\Box Sync\RM&KM_Resources\Training_Resources\08_In Development\Devt_Stata Training\ado"	// This is the location of the "ado" folder for the Stata trainings.

@@ -1,7 +1,4 @@
-* Author: Matthew White, Innovations for Poverty Action, mwhite@poverty-action.org
-* Modified: Rohit Naimpally, J-PAL, rnaimpally@povertyactionlab.org, Harrison Diamond Pollock, IPA, hpollock@poverty-action.org
 * Purpose: Install an ado-file. Modified version installs all ado files in "adolist"
-* Date of last revision: September 10, 2014
 
 
 *********************************MODIFY THESE!**********************************

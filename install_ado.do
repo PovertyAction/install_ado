@@ -59,34 +59,45 @@ foreach ado of loc adolist {
 	}
 }
 
+* Create the system directory if necessary.
+if !`personal' ///
+	loc sysdir "`c(sysdir_plus)'"
+else ///
+	loc sysdir "`c(sysdir_personal)'"
+mata:
+sysdir = st_local("sysdir")
+// "el" for "element"; "els" for "elements."
+el = els = ""
+while (sysdir != "") {
+	pathsplit(sysdir, sysdir, el)
+	els = `"""' + el + `"" "' + els
+}
+st_local("els", els)
+end
+foreach el of loc els {
+	cap mkdir "`prevels'`el'"
+	* "prevels" for "previous elements"
+	loc prevels `prevels'`el'/
+}
+
 * Install the ado-files of `adolist'.
 foreach ado of loc adolist {
-	cap noi {
-		if !`personal' ///
-			loc outdir "`c(sysdir_plus)'`=substr("`ado'", 1, 1)'/"
-		else ///
-			loc outdir "`c(sysdir_personal)'"
+	loc outdir "`sysdir'"
+	if !`personal' {
+		loc outdir "`outdir'`=substr("`ado'", 1, 1)'/"
+		cap mkdir "`outdir'"
+	}
 
-		mata {
-		outdir = st_local("outdir")
-		// "el" for "element"; "els" for "elements."
-		el = els = ""
-		while (outdir != "") {
-			pathsplit(outdir, outdir, el)
-			els = `"""' + el + `"" "' + els
-		}
-		st_local("els", els)
-		}
-		loc prevels
-		foreach el of loc els {
-			cap mkdir "`prevels'`el'"
-			* "prevels" for "previous elements"
-			loc prevels `prevels'`el'/
-		}
+	if `replace' ///
+		loc copy 1
+	else {
+		cap noi conf new f "`outdir'`ado'.ado"
+		if "`cmdname'" != "" & _rc ///
+			ex _rc
+		loc copy = !_rc
+	}
 
-		if !`replace' ///
-			conf new f "`outdir'`ado'.ado"
-
+	if `copy' {
 		foreach ext in ado sthlp hlp {
 			cap erase "`outdir'`ado'.`ext'"
 			cap copy "`dir'/`ado'.`ext'" "`outdir'`ado'.`ext'"

@@ -5,10 +5,6 @@
 
 * The directory that contains the ado-file(s) to install
 local dir C:\Users\matthew\Desktop
-* Optional: The name of the single ado command to install.
-* The ado-file must exist in `dir'.
-* If left blank, all ado-files in `dir' are installed.
-local cmdname
 
 * Advanced: 1 to overwrite the ado-file if it already exists and 0 otherwise;
 * default is 0.
@@ -32,20 +28,11 @@ foreach loc in replace personal {
 * Define `adolist', the list of the names of the ado-file commands to install.
 if !`:length loc dir' ///
 	loc dir .
-if "`cmdname'" != "" {
-	* Check `cmdname'.
-	conf f "`dir'/`cmdname'.ado"
-
-	loc adolist "`cmdname'"
-}
-else {
-	loc adolist : dir "`dir'" file "*.ado"
-	loc adolist : subinstr loc adolist ".ado" "", all
-
-	if !`:list sizeof adolist' qui {
-		noi di as txt _n "No ado-files found."
-		ex
-	}
+loc adolist : dir "`dir'" file "*.ado"
+loc adolist : subinstr loc adolist ".ado" "", all
+if !`:list sizeof adolist' qui {
+	noi di as txt _n "No ado-files found."
+	ex
 }
 
 * Check `adolist'.
@@ -89,8 +76,6 @@ foreach ado of loc adolist {
 		loc copy 1
 	else {
 		cap noi conf new f "`outdir'`ado'.ado"
-		if "`cmdname'" != "" & _rc ///
-			ex _rc
 		loc copy = !_rc
 	}
 

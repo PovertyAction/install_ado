@@ -1,13 +1,13 @@
-* Purpose: Install an ado-file. Modified version installs all ado files in "adolist"
+* Purpose: Install Stata source code files, for instance, an ado-file.
 
 
 *********************************MODIFY THESE!**********************************
 
-* The directory that contains the ado-file(s) to install
+* The directory that contains the source code files to install
 local dir C:\Users\matthew\Desktop
 
-* Advanced: 1 to overwrite the ado-file if it already exists and 0 otherwise;
-* default is 0.
+* Advanced: 1 to overwrite the source code file if it already exists and
+* 0 otherwise; default is 0.
 local replace 0
 * Advanced: 0 to install in the PLUS system directory and 1 to install in the
 * PERSONAL system directory; default is 0.
@@ -25,20 +25,30 @@ foreach loc in replace personal {
 	}
 }
 
-* Define `adolist', the list of the names of the ado-file commands to install.
+* List of Stata file extensions
+loc exts_source ado
+loc exts_help sthlp hlp
+loc exts : list exts_source | exts_help
+
+* Define `sourcelist', the list of the names of the source code files to
+* install.
 if !`:length loc dir' ///
 	loc dir .
-loc adolist : dir "`dir'" file "*.ado"
-loc adolist : subinstr loc adolist ".ado" "", all
-if !`:list sizeof adolist' qui {
-	noi di as txt _n "No ado-files found."
+foreach ext of loc exts {
+	loc files : dir "`dir'" file "*.`ext'"
+	loc files : subinstr loc files ".`ext'" "", all
+	loc sourcelist : list sourcelist | files
+}
+loc sourcelist : list sort sourcelist
+if !`:list sizeof sourcelist' qui {
+	noi di as txt _n "No source code files found."
 	ex
 }
 
-* Check `adolist'.
-foreach ado of loc adolist {
-	if !regexm(substr("`ado'", 1, 1), "^[a-zA-z_]") {
-		di as err "`ado' is an invalid command name"
+* Check `sourcelist'.
+foreach source of loc sourcelist {
+	if !regexm(substr("`source'", 1, 1), "^[a-zA-z_]") {
+		di as err "`source' is an invalid name"
 		ex 198
 	}
 }
@@ -64,27 +74,38 @@ foreach el of loc els {
 	loc prevels `prevels'`el'/
 }
 
-* Install the ado-files of `adolist'.
-foreach ado of loc adolist {
+* Install the source code files of `sourcelist'.
+foreach source of loc sourcelist {
 	loc outdir "`sysdir'"
 	if !`personal' {
-		loc outdir "`outdir'`=substr("`ado'", 1, 1)'/"
+		loc outdir "`outdir'`=substr("`source'", 1, 1)'/"
 		cap mkdir "`outdir'"
 	}
 
-	if `replace' ///
-		loc copy 1
-	else {
-		cap noi conf new f "`outdir'`ado'.ado"
-		loc copy = !_rc
+	loc copy 1
+	if !`replace' {
+		loc any 0
+		loc i 0
+		loc n_exts : list sizeof exts
+		while !`any' & `++i' <= `n_exts' {
+			loc ext : word `i' of `exts'
+			loc file "`outdir'`source'.`ext'"
+			cap conf f "`file'"
+			if !_rc {
+				loc any 1
+				cap noi conf new f "`file'"
+			}
+		}
+		loc copy = !`any'
 	}
 
 	if `copy' {
-		foreach ext in ado sthlp hlp {
-			cap erase "`outdir'`ado'.`ext'"
-			cap copy "`dir'/`ado'.`ext'" "`outdir'`ado'.`ext'"
+		foreach ext of loc exts {
+			loc dest "`outdir'`source'.`ext'"
+			cap erase "`dest'"
+			cap copy "`dir'/`source'.`ext'" "`dest'"
 		}
 
-		di as txt "Installation of {cmd:`ado'} complete."
+		di as txt "Installation of {cmd:`source'} complete."
 	}
 }

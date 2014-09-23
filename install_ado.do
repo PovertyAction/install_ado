@@ -100,12 +100,22 @@ foreach source of loc sourcelist {
 	}
 
 	if `copy' {
+		loc any_source 0
 		foreach ext of loc exts {
+			loc orig "`dir'/`source'.`ext'"
 			loc dest "`outdir'`source'.`ext'"
 			cap erase "`dest'"
-			cap copy "`dir'/`source'.`ext'" "`dest'"
+			cap conf f "`orig'"
+			if !_rc {
+				copy "`orig'" "`dest'"
+				if `:list ext in exts_source' ///
+					loc any_source 1
+			}
 		}
 
-		di as txt "Installation of {cmd:`source'} complete."
+		di as txt "Installation of {cmd:`source'} complete" _c
+		if !`any_source' ///
+			di as txt " (help files only)" _c
+		di "."
 	}
 }

@@ -26,8 +26,8 @@ foreach loc in replace personal {
 }
 
 * List of Stata file extensions
-loc exts_source ado
-loc exts_help sthlp hlp
+loc exts_source ado mlib mo
+loc exts_help sthlp hlp ihlp dlg
 loc exts : list exts_source | exts_help
 
 * Define `sourcelist', the list of the names of the source code files to
